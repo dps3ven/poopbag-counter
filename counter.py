@@ -3,7 +3,7 @@ import time
 import sys
 
 mydb = mysql.connector.connect(
-  host="192.168.1.27",
+  host="192.168.1.27", ## non routable suckkas
   user="root",
   password="admin",
 )
