@@ -74,12 +74,12 @@ def registration():
 # update_format = """UPDATE Bags SET BagRollAge = 2, Remaining = %d WHERE DogName = 'dottie'""", sys.argv[1]
 
 def update(num):
-  print(num)
+  # print(num)
   update = ('Hello %s! This is %s.'%(num,num))
 
   txt = (("UPDATE Bags SET BagRollAge = %s, Remaining = 22 WHERE DogName = 'dottie';"%num))
-  print('Hello %s! This is %s.'%(num,num))
-  print(txt)
+  # print('Hello %s! This is %s.'%(num,num))
+  # print(txt)
   # print(txt.format("UPDATE Bags SET BagRollAge = 2, Remaining = num WHERE DogName = 'dottie';")) 
   mycursor.execute(txt)
   # for x in mycursor:
@@ -118,5 +118,5 @@ registration()
 showtables()
 
 
-update(666)
+update(123)
 output()
