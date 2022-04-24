@@ -1,3 +1,4 @@
+from os import curdir
 import mysql.connector
 from build import re
 import time
@@ -79,10 +80,22 @@ def registration():
   mydb.commit()
 
 def update(dogname):
+  throw = "SIGNAL"
   print("How many bags used today?")
   bags_used_today = int(input())
   mycursor.execute('SET @Remains := (SELECT Remaining FROM Bags);')
   mycursor.execute('SET @BagsRemaining := ( @Remains - {bags_used_today});'.format(initial_bags=initial_bags,bags_used_today=bags_used_today))
+  mycursor.execute(
+    """SELECT IF(@BagsRemaining>0, "hi", "bye");"""
+  )
+  # turn value into python?
+  for x in mycursor:
+    print(x)
+    # if x == "hi":
+    #   print("destroy")
+    # else:
+    #   print("wellp")
+  # throw error
   mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
   mydb.commit()
 
