@@ -1,4 +1,5 @@
 import mysql.connector
+from build import re
 import time
 import sys
 
@@ -7,12 +8,13 @@ mydb = mysql.connector.connect(
   user="root",
   password="admin",
 )
-mycursor = mydb.cursor()
+mycursor = mydb.cursor(buffered=True)
 
-mycursor.execute("CREATE DATABASE IF NOT EXISTS poopbags") ## var
+# mycursor.execute("CREATE DATABASE IF NOT EXISTS poopbags;") ## var
 
 mydb.database = "poopbags" ## var this is use database
 
+initial_bags = 24
 
 # maybe reorder table is primary key
 ## id needs to be generated ????
@@ -50,73 +52,68 @@ def showtables():
   for x in mycursor:
     print(x) 
 
-## two functions
-# #### registration
-def registration():
-  mycursor.execute("INSERT INTO Bags VALUES('dottie',1,25);")
-# ## one for updates
-
-    # # prepare query and data
-    # query = """ UPDATE books
-    #             SET title = %s
-    #             WHERE id = %s """
-
-    # data = (title, book_id)
-
-    # try:
-    #     conn = MySQLConnection(**db_config)
-
-    #     # update book title
-    #     cursor = conn.cursor()
-    #     cursor.execute(query, data)
-
-
-# update_format = """UPDATE Bags SET BagRollAge = 2, Remaining = %d WHERE DogName = 'dottie'""", sys.argv[1]
-
-def update(num):
-  # print(num)
-  update = ('Hello %s! This is %s.'%(num,num))
-
-  txt = (("UPDATE Bags SET BagRollAge = %s, Remaining = 22 WHERE DogName = 'dottie';"%num))
-  # print('Hello %s! This is %s.'%(num,num))
-  # print(txt)
-  # print(txt.format("UPDATE Bags SET BagRollAge = 2, Remaining = num WHERE DogName = 'dottie';")) 
-  mycursor.execute(txt)
-  # for x in mycursor:
-  #   print(x)
-  
-  # int = int
-  # query = """ 
-  # #   UPDATE Bags
-  # #   SET Remaining = num
-  # #   WHERE DogName = dottie 
-  # """
-  # txt = "For only {price:.2f} dollars!"
-
-  # mycursor.execute(query, [44])
-  # for x in mycursor:
-  #   print(x)
-
 def output():
   mycursor.execute("Select * FROM Bags;")
   for x in mycursor:
     print(x)
 
+
 def showdatabases():
-  mycursor.execute("SHOW DATABASES")
+  mycursor.execute("SHOW DATABASES;")
   for x in mycursor:
     print(x) 
 
 def createtable():
-  mycursor.execute("CREATE TABLE IF NOT EXISTS Bags (DogName varchar(255) NOT NULL PRIMARY KEY, BagRollAge int, Remaining int)") ## OWNER IS PRIMARY KEY?
+  mycursor.execute("CREATE TABLE IF NOT EXISTS Bags (DogName varchar(255) NOT NULL PRIMARY KEY, BagRollAge int, InitialBags int, Remaining int);")
+  mydb.commit()
 
+def desc_tables():
+  print("here is the table")
+  mycursor.execute("Describe Bags;")  
+  for x in mycursor:
+    print(x)
 
-showdatabases()
-createtable()
+def registration():
+  message = """ INSERT INTO Bags(DogName, BagRollAge, InitialBags, Remaining) VALUES ('dottie', 1, 24, 24); """
+  mycursor.execute(message)
+  mydb.commit()
 
-registration()
-showtables()
+def update(dogname):
+  print("How many bags used today?")
+  bags_used_today = int(input())
+  mycursor.execute('SET @Remains := (SELECT Remaining FROM Bags);')
+  mycursor.execute('SET @BagsRemaining := ( @Remains - {bags_used_today});'.format(initial_bags=initial_bags,bags_used_today=bags_used_today))
+  mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
+  mydb.commit()
 
+  # remaining = 24 - bags_used_today
+  # message = ('UPDATE Bags SET BagRollAge = {bagrollage}, Remaining = {remaining} WHERE DogName = "dottie";'.format(bagrollage=bagrollage,remaining=remaining))
+  # mycursor.execute(message)
+  # mydb.commit()
+  # return bags_used_today
 
-update(777)
-output()
+# def getRemaingBags():
+#   message = ("Select InitialBagCount FROM Bags;")
+#   mycursor.execute(message)
+#   for x in mycursor:
+#     return x
+
+def deregistration(dogname):
+  print("removed account")
+  message = ('DELETE FROM Bags WHERE DogName="{dogname}"'.format(dogname=dogname))
+  print(message)
+
+  mycursor.execute(message)
+  mydb.commit()
+
+# showdatabases()
+# createtable()
+# showtables()
+
+# desc_tables()
+
+# registration()
+update("dottie")
+# deregistration('dottie')
+
+# output()
