@@ -7,7 +7,7 @@ import sys
 mydb = mysql.connector.connect(
   host="192.168.1.27", ## non routable suckkas
   user="root",
-  password="admin",
+  password="F0und@t1on",
 )
 mycursor = mydb.cursor(buffered=True)
 
@@ -86,18 +86,19 @@ def update(dogname):
   mycursor.execute('SET @Remains := (SELECT Remaining FROM Bags);')
   mycursor.execute('SET @BagsRemaining := ( @Remains - {bags_used_today});'.format(initial_bags=initial_bags,bags_used_today=bags_used_today))
   mycursor.execute(
-    """SELECT IF(@BagsRemaining>0, "hi", "bye");"""
+    """SELECT IF(@BagsRemaining>=1, 'true', 'false');"""
   )
   # turn value into python?
   for x in mycursor:
     print(x)
-    # if x == "hi":
-    #   print("destroy")
-    # else:
-    #   print("wellp")
+    if x == ('true',):
+      print("bags ok")
+    else:
+      print("need new bags")
   # throw error
   mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
   mydb.commit()
+  
 
   # remaining = 24 - bags_used_today
   # message = ('UPDATE Bags SET BagRollAge = {bagrollage}, Remaining = {remaining} WHERE DogName = "dottie";'.format(bagrollage=bagrollage,remaining=remaining))
@@ -127,6 +128,6 @@ def deregistration(dogname):
 
 # registration()
 update("dottie")
-# deregistration('dottie')
+deregistration('dottie')
 
-# output()
+output()
