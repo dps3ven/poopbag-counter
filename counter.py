@@ -1,4 +1,5 @@
-from os import curdir
+import os
+import signal
 import mysql.connector
 from build import re
 import time
@@ -64,7 +65,7 @@ def showdatabases():
     print(x) 
 
 def createtable():
-  mycursor.execute("CREATE TABLE IF NOT EXISTS Bags (DogName varchar(255) NOT NULL PRIMARY KEY, BagRollAge int, InitialBags int, Remaining int unsigned);")
+  mycursor.execute("CREATE TABLE IF NOT EXISTS Bags (DogName varchar(255) NOT NULL PRIMARY KEY, BagRollAge int, InitialBags int, Remaining int);")
   mydb.commit()
 
 def desc_tables():
@@ -83,27 +84,20 @@ def update(dogname):
   bags_used_today = int(input())
   q='SET @BagsRemaining := ( @Remains - {bags_used_today});'.format(initial_bags=initial_bags,bags_used_today=bags_used_today)
   mycursor.execute('SET @Remains := (SELECT Remaining FROM Bags WHERE DogName = "{dogname}");'.format(dogname=dogname))
+  mydb.commit()
   mycursor.execute(q)
-  mycursor.execute(
-    """SELECT IF(@BagsRemaining<=1, 'true', 'false');""" ## math problem is here
-  )
-  # turn value into python?
-  for x in mycursor:  ## this needs to be a precondition or let the output function control
-    print(x)
-    if x == ('true',):
-      print("bags ok")
-    else:
-      print("need new bags")
-      # raise Exception("Email new bags needed")
+  mydb.commit()
   mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
   mydb.commit()
-  
-
-  # remaining = 24 - bags_used_today
-  # message = ('UPDATE Bags SET BagRollAge = {bagrollage}, Remaining = {remaining} WHERE DogName = "dottie";'.format(bagrollage=bagrollage,remaining=remaining))
-  # mycursor.execute(message)
-  # mydb.commit()
-  # return bags_used_today
+  mycursor.execute('SELECT Remaining from Bags')
+  records = mycursor.fetchone()[0]
+  print(records)
+  if records ==1:
+    print("Warning: New Bag Roll Needed")
+  if records <=0:
+    raise Exception("No More Bags Left")
+  else:
+    print("Bags left {}".format(records))
 
 def getRemaingBags(dogname): ## precondition
   message = ('Select Remaining FROM Bags WHERE DogName = "{dogname}";'.format(dogname=dogname))
