@@ -87,17 +87,22 @@ def update(dogname):
   mydb.commit()
   mycursor.execute(q)
   mydb.commit()
-  mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
-  mydb.commit()
   mycursor.execute('SELECT Remaining from Bags')
   records = mycursor.fetchone()[0]
+  records = records - bags_used_today ## lazy and should be put into separate function
   print(records)
-  if records ==1:
+  if records >=2:
+    mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
+    mydb.commit()
+  elif records ==1:
     print("Warning: New Bag Roll Needed")
-  if records <=0:
-    raise Exception("No More Bags Left")
+    mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
+    mydb.commit()
   else:
-    print("Bags left {}".format(records))
+    raise Exception("No More Bags Left")  
+  print("Bags left {}".format(records))
+
+
 
 def getRemaingBags(dogname): ## precondition
   message = ('Select Remaining FROM Bags WHERE DogName = "{dogname}";'.format(dogname=dogname))
