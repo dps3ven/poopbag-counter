@@ -1,4 +1,5 @@
 import os
+from re import M
 import signal
 import mysql.connector
 from build import re
@@ -74,33 +75,43 @@ def desc_tables():
   for x in mycursor:
     print(x)
 
-def registration():
-  message = """ INSERT INTO Bags(DogName, BagRollAge, InitialBags, Remaining) VALUES ('dottie', 1, 24, 24); """
+def registration(dogname):
+  message = 'INSERT INTO Bags(DogName, BagRollAge, InitialBags, Remaining) VALUES ("{dogname}", 1, 24, 24);'.format(dogname=dogname)
+  mycursor.execute(message)
+  mydb.commit()
+
+def new_bags(dogname):
+  message = 'UPDATE Bags Set Remaining = 24 WHERE Dogname = "{dogname}";'.format(dogname=dogname)
   mycursor.execute(message)
   mydb.commit()
 
 def update(dogname):
   print("How many bags used today?")
   bags_used_today = int(input())
-  q='SET @BagsRemaining := ( @Remains - {bags_used_today});'.format(initial_bags=initial_bags,bags_used_today=bags_used_today)
-  mycursor.execute('SET @Remains := (SELECT Remaining FROM Bags WHERE DogName = "{dogname}");'.format(dogname=dogname))
-  mydb.commit()
-  mycursor.execute(q)
-  mydb.commit()
-  mycursor.execute('SELECT Remaining from Bags')
-  records = mycursor.fetchone()[0]
-  records = records - bags_used_today ## lazy and should be put into separate function
-  print(records)
-  if records >=2:
+  try:
+    q='SET @BagsRemaining := ( @Remains - {bags_used_today});'.format(initial_bags=initial_bags,bags_used_today=bags_used_today)
+    mycursor.execute('SET @Remains := (SELECT Remaining FROM Bags WHERE DogName = "{dogname}");'.format(dogname=dogname))
+    mydb.commit()
+    mycursor.execute(q)
+    mydb.commit()
+    mycursor.execute('SELECT Remaining from Bags')
+    bags_left = mycursor.fetchone()[0]
+  except:
+    print("Registation Error")
+    raise Exception("Verify Registration for {}".format(dogname))
+
+  bags_left = bags_left - bags_used_today ## lazy and should be put into separate function
+  print(bags_left)
+  if bags_left >=2:
     mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
     mydb.commit()
-  elif records ==1:
+  elif bags_left ==1:
     print("Warning: New Bag Roll Needed")
     mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
     mydb.commit()
   else:
-    raise Exception("No More Bags Left")  
-  print("Bags left {}".format(records))
+    raise Exception("No More Bags Left - Warned You")  
+  print("Bags left {} for {}".format(bags_left, dogname))
 
 
 
@@ -124,9 +135,10 @@ showtables()
 
 desc_tables()
 
-# registration()
-update("dottie")
+# registration('dottie')
+# update("dottie")
+# new_bags('dottie')
 # getRemaingBags('dottie')
-# deregistration('dottie')
+deregistration('dottie')
 
 output()
