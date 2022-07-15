@@ -115,7 +115,7 @@ def update(dogname):
 
 
 
-def getRemaingBags(dogname): ## precondition
+def getRemaingBags(dogname): ## precondition currently lives in update function
   message = ('Select Remaining FROM Bags WHERE DogName = "{dogname}";'.format(dogname=dogname))
   mycursor.execute(message)
   for x in mycursor:
@@ -139,6 +139,6 @@ desc_tables()
 # update("dottie")
 # new_bags('dottie')
 # getRemaingBags('dottie')
-deregistration('dottie')
+# deregistration('dottie')
 
 output()
