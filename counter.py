@@ -64,7 +64,7 @@ def showdatabases():
     print(x) 
 
 def createtable():
-  mycursor.execute("CREATE TABLE IF NOT EXISTS Bags (DogName varchar(255) NOT NULL PRIMARY KEY, BagRollAge int, InitialBags int, Remaining int);")
+  mycursor.execute("CREATE TABLE IF NOT EXISTS Bags (DogName varchar(255) NOT NULL PRIMARY KEY, BagRollAge int, InitialBags int, Remaining int unsigned);")
   mydb.commit()
 
 def desc_tables():
@@ -79,22 +79,22 @@ def registration():
   mydb.commit()
 
 def update(dogname):
-  throw = "SIGNAL"
   print("How many bags used today?")
   bags_used_today = int(input())
-  mycursor.execute('SET @Remains := (SELECT Remaining FROM Bags);')
-  mycursor.execute('SET @BagsRemaining := ( @Remains - {bags_used_today});'.format(initial_bags=initial_bags,bags_used_today=bags_used_today))
+  q='SET @BagsRemaining := ( @Remains - {bags_used_today});'.format(initial_bags=initial_bags,bags_used_today=bags_used_today)
+  mycursor.execute('SET @Remains := (SELECT Remaining FROM Bags WHERE DogName = "{dogname}");'.format(dogname=dogname))
+  mycursor.execute(q)
   mycursor.execute(
-    """SELECT IF(@BagsRemaining>=1, 'true', 'false');"""
+    """SELECT IF(@BagsRemaining<=1, 'true', 'false');""" ## math problem is here
   )
   # turn value into python?
-  for x in mycursor:
+  for x in mycursor:  ## this needs to be a precondition or let the output function control
     print(x)
     if x == ('true',):
       print("bags ok")
     else:
       print("need new bags")
-  # throw error
+      # raise Exception("Email new bags needed")
   mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
   mydb.commit()
   
@@ -105,11 +105,11 @@ def update(dogname):
   # mydb.commit()
   # return bags_used_today
 
-# def getRemaingBags():
-#   message = ("Select InitialBagCount FROM Bags;")
-#   mycursor.execute(message)
-#   for x in mycursor:
-#     return x
+def getRemaingBags(dogname): ## precondition
+  message = ('Select Remaining FROM Bags WHERE DogName = "{dogname}";'.format(dogname=dogname))
+  mycursor.execute(message)
+  for x in mycursor:
+    return x
 
 def deregistration(dogname):
   print("removed account")
@@ -119,14 +119,15 @@ def deregistration(dogname):
   mycursor.execute(message)
   mydb.commit()
 
-# showdatabases()
-# createtable()
-# showtables()
+showdatabases()
+createtable() # is this not needed with update?
+showtables()
 
-# desc_tables()
+desc_tables()
 
 # registration()
 update("dottie")
-deregistration('dottie')
+# getRemaingBags('dottie')
+# deregistration('dottie')
 
 output()
