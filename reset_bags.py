@@ -2,7 +2,8 @@ import mysql.connector
 import os
 
 ## sourced from environment
-dogname ="dottie"
+print("What is your dog's name?")
+dogname = str(input())
 initial_bags = 24
 mydb = mysql.connector.connect(
   host=(os.environ["database_host"]),

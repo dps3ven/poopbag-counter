@@ -2,7 +2,8 @@ import mysql.connector
 import os
 
 ## sourced from environment
-dogname ="dottie"
+print("What is your dog's name?")
+dogname = str(input())
 mydb = mysql.connector.connect(
   host=(os.environ["database_host"]),
   user=(os.environ["database_user"]),
@@ -11,6 +12,6 @@ mydb = mysql.connector.connect(
 mydb.database=(os.environ["database_name"])
 mycursor = mydb.cursor()
 
-message = 'INSERT INTO Bags(DogName, BagRollAge, InitialBags, Remaining) VALUES ("{dogname}", 1, 24, 24);'.format(dogname=dogname)
+message = 'INSERT INTO Bags(DogName, InitialBags, Remaining) VALUES ("{dogname}", 24, 24);'.format(dogname=dogname)
 mycursor.execute(message)
 mydb.commit()

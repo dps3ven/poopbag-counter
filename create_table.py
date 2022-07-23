@@ -9,5 +9,5 @@ mydb = mysql.connector.connect(
 )
 mydb.database=(os.environ["database_name"])
 mycursor = mydb.cursor(buffered=True)
-mycursor.execute("CREATE TABLE IF NOT EXISTS Bags (DogName varchar(255) NOT NULL PRIMARY KEY, BagRollAge int, InitialBags int, Remaining int);")
+mycursor.execute("CREATE TABLE IF NOT EXISTS Bags (DogName varchar(255) NOT NULL PRIMARY KEY, InitialBags int, Remaining int NOT NULL);")
 mydb.commit()

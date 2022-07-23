@@ -2,7 +2,8 @@ import mysql.connector
 import os
 
 ## sourced from environment
-dogname ="dottie"
+print("What is your dog's name?")
+dogname = str(input())
 initial_bags = 24
 mydb = mysql.connector.connect(
   host=(os.environ["database_host"]),
@@ -19,21 +20,25 @@ try:
     mydb.commit()
     mycursor.execute(q)
     mydb.commit()
-    mycursor.execute('SELECT Remaining from Bags')
+    x='SELECT Remaining from Bags WHERE DogName = "{dogname}";'.format(dogname=dogname)
+    mycursor.execute(x)
     bags_left = mycursor.fetchone()[0]
 except:
     print("Registation Error")
     raise Exception("Verify Registration for {}".format(dogname))
-
 bags_left = bags_left - bags_used_today ## lazy and should be put into separate function
 print(bags_left)
 if bags_left >=2:
-    mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
+    mycursor.execute('UPDATE Bags SET Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
     mydb.commit()
 elif bags_left ==1:
     print("Warning: New Bag Roll Needed")
-    mycursor.execute('UPDATE Bags SET BagRollAge = 1, Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
+    mycursor.execute('UPDATE Bags SET Remaining = @BagsRemaining WHERE DogName = "{dogname}";'.format(dogname=dogname))
     mydb.commit()
+    raise Exception("One Bag Left - Warning You") 
 else:
-    raise Exception("No More Bags Left - Warned You")  
-    print("Bags left {} for {}".format(bags_left, dogname))
+    x='UPDATE Bags SET Remaining = 0 WHERE DogName = "{dogname}";'.format(dogname=dogname)
+    mycursor.execute(x)
+    mydb.commit()
+    raise Exception("No More Bags Left") 
+
